@@ -12,16 +12,28 @@ import Contact from "./pages/Contact"
 import Businesses from "./pages/Businesses"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
+import AddBusiness from "./pages/AddBusiness"
+import BusinessDetails from "./pages/BusinessDetails"
+
+import AdminDashboard from "./admin/AdminDashboard"
 
 function App() {
+
   return (
+
     <BrowserRouter>
 
       <Routes>
 
-        <Route path="/" element={<MainLayout />}>
+        <Route
+          path="/"
+          element={<MainLayout />}
+        >
 
-          <Route index element={<Home />} />
+          <Route
+            index
+            element={<Home />}
+          />
 
           <Route
             path="about"
@@ -39,6 +51,16 @@ function App() {
           />
 
           <Route
+            path="business/:id"
+            element={<BusinessDetails />}
+          />
+
+          <Route
+            path="add-business"
+            element={<AddBusiness />}
+          />
+
+          <Route
             path="login"
             element={<Login />}
           />
@@ -48,11 +70,17 @@ function App() {
             element={<Register />}
           />
 
+          <Route
+            path="admin"
+            element={<AdminDashboard />}
+          />
+
         </Route>
 
       </Routes>
 
     </BrowserRouter>
+
   )
 }
 
