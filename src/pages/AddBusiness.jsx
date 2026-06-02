@@ -1,3 +1,5 @@
+import axios from "axios"
+
 import { useState } from "react"
 
 import {
@@ -16,6 +18,7 @@ function AddBusiness() {
     description: "",
     phone: "",
     address: "",
+    image: "",
   })
 
   const handleChange = (e) => {
@@ -24,6 +27,47 @@ function AddBusiness() {
       ...formData,
       [e.target.name]: e.target.value,
     })
+
+  }
+
+  const handleImageUpload = async (e) => {
+
+    const file = e.target.files[0]
+
+    const data = new FormData()
+
+    data.append("file", file)
+
+    data.append(
+      "upload_preset",
+      "findughelli_upload"
+    )
+
+    try {
+
+      const response =
+        await axios.post(
+
+          "https://api.cloudinary.com/v1_1/dwl4ix6uu/image/upload",
+
+          data
+        )
+
+      setFormData({
+        ...formData,
+        image: response.data.secure_url,
+      })
+
+      alert("Image uploaded successfully")
+
+    } catch (error) {
+
+      console.log(error)
+
+      alert("Upload failed")
+
+    }
+
   }
 
   const handleSubmit = async (e) => {
@@ -54,6 +98,7 @@ function AddBusiness() {
         description: "",
         phone: "",
         address: "",
+        image: "",
       })
 
     } catch (error) {
@@ -61,6 +106,7 @@ function AddBusiness() {
       alert(error.message)
 
     }
+
   }
 
   return (
@@ -83,6 +129,13 @@ function AddBusiness() {
           className="w-full border p-3 rounded"
           value={formData.name}
           onChange={handleChange}
+        />
+
+        <input
+          type="file"
+          accept="image/*"
+          className="w-full border p-3 rounded"
+          onChange={handleImageUpload}
         />
 
         <input
@@ -130,6 +183,7 @@ function AddBusiness() {
       </form>
 
     </div>
+
   )
 }
 

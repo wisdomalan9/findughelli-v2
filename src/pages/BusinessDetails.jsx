@@ -60,6 +60,15 @@ function BusinessDetails() {
         {vendor.name}
       </h1>
 
+<img
+  src={
+    vendor.image ||
+    "https://via.placeholder.com/1200x600"
+  }
+  alt={vendor.name}
+  className="w-full h-96 object-cover rounded-xl mb-6"
+/>
+
       <p className="text-blue-700 text-xl mb-4">
         {vendor.category}
       </p>

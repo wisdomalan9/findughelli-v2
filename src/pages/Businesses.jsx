@@ -80,39 +80,52 @@ function Businesses() {
               key={vendor.id}
             >
 
-              <div className="border p-6 rounded-xl shadow hover:shadow-lg transition">
+              <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition">
 
-                <div className="flex items-center gap-2 mb-2">
+                <img
+                  src={
+                    vendor.image ||
+                    "https://via.placeholder.com/600x400"
+                  }
+                  alt={vendor.name}
+                  className="w-full h-48 object-cover"
+                />
 
-                  <h2 className="text-2xl font-bold">
-                    {vendor.name}
-                  </h2>
+                <div className="p-6">
 
-                  {vendor.featured && (
+                  <div className="flex items-center gap-2 mb-2">
 
-                    <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded">
-                      Featured
-                    </span>
+                    <h2 className="text-2xl font-bold">
+                      {vendor.name}
+                    </h2>
 
-                  )}
+                    {vendor.featured && (
+
+                      <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded">
+                        Featured
+                      </span>
+
+                    )}
+
+                  </div>
+
+                  <p className="text-blue-700 mb-2">
+                    {vendor.category}
+                  </p>
+
+                  <p className="mb-4">
+                    {vendor.description}
+                  </p>
+
+                  <p>
+                    {vendor.phone}
+                  </p>
+
+                  <p>
+                    {vendor.address}
+                  </p>
 
                 </div>
-
-                <p className="text-blue-700 mb-2">
-                  {vendor.category}
-                </p>
-
-                <p className="mb-4">
-                  {vendor.description}
-                </p>
-
-                <p>
-                  {vendor.phone}
-                </p>
-
-                <p>
-                  {vendor.address}
-                </p>
 
               </div>
 
