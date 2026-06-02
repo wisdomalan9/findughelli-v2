@@ -119,6 +119,15 @@ function VendorDashboard() {
                 {vendor.category}
               </p>
 
+<p className="text-sm">
+  Views: {vendor.views || 0}
+</p>
+
+<p className="text-sm mb-4">
+  WhatsApp Clicks:
+  {" "}
+  {vendor.whatsappClicks || 0}
+</p>
               <p className="text-sm mb-4">
 
                 {vendor.approved

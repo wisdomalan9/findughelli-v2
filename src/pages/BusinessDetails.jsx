@@ -6,7 +6,9 @@ import {
 
 import {
   doc,
-  getDoc
+  getDoc,
+  updateDoc,
+  increment
 } from "firebase/firestore"
 
 import { db } from "../firebase/firebase"
@@ -29,6 +31,13 @@ function BusinessDetails() {
 
       if (docSnap.exists()) {
 
+        await updateDoc(
+          docRef,
+          {
+            views: increment(1),
+          }
+        )
+
         setVendor({
           id: docSnap.id,
           ...docSnap.data(),
@@ -41,6 +50,22 @@ function BusinessDetails() {
     fetchVendor()
 
   }, [id])
+
+  const handleWhatsappClick =
+    async () => {
+
+      const docRef =
+        doc(db, "vendors", id)
+
+      await updateDoc(
+        docRef,
+        {
+          whatsappClicks:
+            increment(1),
+        }
+      )
+
+    }
 
   if (!vendor) {
 
@@ -60,14 +85,14 @@ function BusinessDetails() {
         {vendor.name}
       </h1>
 
-<img
-  src={
-    vendor.image ||
-    "https://via.placeholder.com/1200x600"
-  }
-  alt={vendor.name}
-  className="w-full h-96 object-cover rounded-xl mb-6"
-/>
+      <img
+        src={
+          vendor.image ||
+          "https://via.placeholder.com/1200x600"
+        }
+        alt={vendor.name}
+        className="w-full h-96 object-cover rounded-xl mb-6"
+      />
 
       <p className="text-blue-700 text-xl mb-4">
         {vendor.category}
@@ -90,6 +115,18 @@ function BusinessDetails() {
           {" "}
           {vendor.address}
         </p>
+
+        <a
+          href={`https://wa.me/${vendor.phone}`}
+          target="_blank"
+          rel="noreferrer"
+          onClick={handleWhatsappClick}
+          className="inline-block mt-6 bg-green-600 text-white px-6 py-3 rounded"
+        >
+
+          Chat on WhatsApp
+
+        </a>
 
       </div>
 

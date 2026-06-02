@@ -35,7 +35,27 @@ function Businesses() {
 
       })
 
-      setVendors(vendorsData)
+vendorsData.sort((a, b) => {
+
+  if (
+    a.premium === true &&
+    b.premium !== true
+  ) {
+    return -1
+  }
+
+  if (
+    a.premium !== true &&
+    b.premium === true
+  ) {
+    return 1
+  }
+
+  return b.views - a.views
+
+})
+
+setVendors(vendorsData)
 
     }
 
@@ -99,13 +119,21 @@ function Businesses() {
                       {vendor.name}
                     </h2>
 
-                    {vendor.featured && (
+{vendor.featured && (
 
-                      <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded">
-                        Featured
-                      </span>
+  <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded">
+    Featured
+  </span>
 
-                    )}
+)}
+
+{vendor.premium && (
+
+  <span className="bg-purple-700 text-white text-xs px-2 py-1 rounded">
+    Premium
+  </span>
+
+)}
 
                   </div>
 

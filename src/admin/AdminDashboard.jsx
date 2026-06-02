@@ -39,6 +39,7 @@ function AdminDashboard() {
     })
 
     setVendors(vendorsData)
+
   }
 
   const approveVendor = async (id) => {
@@ -51,16 +52,7 @@ function AdminDashboard() {
     })
 
     fetchVendors()
-  }
 
-  const deleteVendor = async (id) => {
-
-    const vendorRef =
-      doc(db, "vendors", id)
-
-    await deleteDoc(vendorRef)
-
-    fetchVendors()
   }
 
   const featureVendor = async (id) => {
@@ -73,6 +65,32 @@ function AdminDashboard() {
     })
 
     fetchVendors()
+
+  }
+
+  const togglePremium =
+    async (id, status) => {
+
+      await updateDoc(
+        doc(db, "vendors", id),
+        {
+          premium: !status,
+        }
+      )
+
+      fetchVendors()
+
+    }
+
+  const deleteVendor = async (id) => {
+
+    const vendorRef =
+      doc(db, "vendors", id)
+
+    await deleteDoc(vendorRef)
+
+    fetchVendors()
+
   }
 
   return (
@@ -86,11 +104,13 @@ function AdminDashboard() {
       <div className="grid md:grid-cols-3 gap-6 mb-10">
 
         <div className="bg-blue-700 text-white p-6 rounded-xl">
+
           <h2 className="text-2xl font-bold">
             {vendors.length}
           </h2>
 
           <p>Total Vendors</p>
+
         </div>
 
       </div>
@@ -112,12 +132,26 @@ function AdminDashboard() {
               {vendor.category}
             </p>
 
-            <p className="mb-4">
+            <p className="mb-2">
+
               Approved:
               {" "}
+
               {vendor.approved
                 ? "Yes"
                 : "No"}
+
+            </p>
+
+            <p className="mb-4">
+
+              Premium:
+              {" "}
+
+              {vendor.premium
+                ? "Yes"
+                : "No"}
+
             </p>
 
             <div className="flex gap-4 flex-wrap">
@@ -142,6 +176,22 @@ function AdminDashboard() {
 
               <button
                 onClick={() =>
+                  togglePremium(
+                    vendor.id,
+                    vendor.premium
+                  )
+                }
+                className="bg-purple-700 text-white px-4 py-2 rounded"
+              >
+
+                {vendor.premium
+                  ? "Remove Premium"
+                  : "Make Premium"}
+
+              </button>
+
+              <button
+                onClick={() =>
                   deleteVendor(vendor.id)
                 }
                 className="bg-red-600 text-white px-4 py-2 rounded"
@@ -158,6 +208,7 @@ function AdminDashboard() {
       </div>
 
     </div>
+
   )
 }
 

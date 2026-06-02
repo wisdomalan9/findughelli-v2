@@ -87,6 +87,7 @@ await addDoc(
     premium: false,
     approved: false,
     views: 0,
+whatsappClicks: 0,
     rating: 0,
     reviews: 0,
     createdAt: serverTimestamp(),
