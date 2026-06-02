@@ -1,7 +1,7 @@
 import axios from "axios"
 
 import { useState } from "react"
-
+import { auth } from "../firebase/firebase"
 import {
   collection,
   addDoc,
@@ -76,19 +76,22 @@ function AddBusiness() {
 
     try {
 
-      await addDoc(
-        collection(db, "vendors"),
-        {
-          ...formData,
-          featured: false,
-          premium: false,
-          approved: false,
-          views: 0,
-          rating: 0,
-          reviews: 0,
-          createdAt: serverTimestamp(),
-        }
-      )
+await addDoc(
+  collection(db, "vendors"),
+  {
+    ...formData,
+
+    ownerId: auth.currentUser.uid,
+
+    featured: false,
+    premium: false,
+    approved: false,
+    views: 0,
+    rating: 0,
+    reviews: 0,
+    createdAt: serverTimestamp(),
+  }
+)
 
       alert("Business submitted successfully")
 

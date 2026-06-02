@@ -16,6 +16,8 @@ import AddBusiness from "./pages/AddBusiness"
 import BusinessDetails from "./pages/BusinessDetails"
 import ProtectedRoute from "./components/ProtectedRoute"
 import AdminDashboard from "./admin/AdminDashboard"
+import VendorDashboard from "./vendor/VendorDashboard"
+import EditBusiness from "./vendor/EditBusiness"
 
 function App() {
 
@@ -81,6 +83,27 @@ function App() {
   }
 />
 
+<Route
+  path="vendor-dashboard"
+  element={
+    <ProtectedRoute>
+
+      <VendorDashboard />
+
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="edit-business/:id"
+  element={
+    <ProtectedRoute>
+
+      <EditBusiness />
+
+    </ProtectedRoute>
+  }
+/>
 
         </Route>
 

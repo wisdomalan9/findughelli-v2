@@ -60,17 +60,11 @@ function Navbar() {
             Add Business
           </Link>
 
-          {!user && (
+          {user && (
 
-            <>
-              <Link to="/login">
-                Login
-              </Link>
-
-              <Link to="/register">
-                Register
-              </Link>
-            </>
+            <Link to="/vendor-dashboard">
+              Dashboard
+            </Link>
 
           )}
 
@@ -82,7 +76,21 @@ function Navbar() {
 
           )}
 
-          {user && (
+          {!user ? (
+
+            <>
+
+              <Link to="/login">
+                Login
+              </Link>
+
+              <Link to="/register">
+                Register
+              </Link>
+
+            </>
+
+          ) : (
 
             <button
               onClick={handleLogout}
