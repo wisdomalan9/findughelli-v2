@@ -11,15 +11,24 @@ import {
   increment
 } from "firebase/firestore"
 
+import { db } from "../firebase/firebase"
+
 import Loader from "../components/ui/Loader"
 
-import { db } from "../firebase/firebase"
+import ReviewForm from "../components/reviews/ReviewForm"
+
+import ReviewsList from "../components/reviews/ReviewsList"
+
+import {
+  Helmet
+} from "react-helmet-async"
 
 function BusinessDetails() {
 
   const { id } = useParams()
 
-  const [vendor, setVendor] = useState(null)
+  const [vendor, setVendor] =
+    useState(null)
 
   useEffect(() => {
 
@@ -71,57 +80,77 @@ function BusinessDetails() {
 
   if (!vendor) {
 
-    return (
-      <div className="p-10">
-        <Loader />
-      </div>
-    )
+    return <Loader />
 
   }
 
   return (
 
-    <div className="max-w-4xl mx-auto p-10">
+    <>
 
-      <h1 className="text-5xl font-bold mb-4">
-        {vendor.name}
-      </h1>
+      <Helmet>
 
-      <img
-        src={
-          vendor.image ||
-          "https://via.placeholder.com/1200x600"
-        }
-        alt={vendor.name}
-        className="w-full h-96 object-cover rounded-xl mb-6"
-      />
+        <title>
+          {vendor.name} | FindUghelli
+        </title>
 
-      <p className="text-blue-700 text-xl mb-4">
-        {vendor.category}
-      </p>
+        <meta
+          name="description"
+          content={vendor.description}
+        />
 
-      <p className="mb-6">
-        {vendor.description}
-      </p>
+      </Helmet>
 
-      <div className="space-y-2">
+      <div className="max-w-4xl mx-auto p-10">
 
-        <p>
-          <strong>Phone:</strong>
-          {" "}
-          {vendor.phone}
+        <img
+          loading="lazy"
+          src={vendor.image}
+          alt={vendor.name}
+          className="w-full h-96 object-cover rounded-xl mb-8"
+        />
+
+        <h1 className="text-5xl font-bold mb-4">
+          {vendor.name}
+        </h1>
+
+        <p className="text-blue-700 text-xl mb-4">
+          {vendor.category}
         </p>
 
-        <p>
-          <strong>Address:</strong>
-          {" "}
-          {vendor.address}
+        <p className="mb-6">
+          {vendor.description}
         </p>
+
+        <div className="space-y-2">
+
+          <p>
+            <strong>Phone:</strong>
+            {" "}
+            {vendor.phone}
+          </p>
+
+          <p>
+            <strong>Address:</strong>
+            {" "}
+            {vendor.address}
+          </p>
+
+          <p>
+            <strong>Views:</strong>
+            {" "}
+            {vendor.views || 0}
+          </p>
+
+<ReviewForm vendorId={vendor.id} />
+
+<ReviewsList vendorId={vendor.id} />
+
+        </div>
 
         <a
           href={`https://wa.me/${vendor.phone}`}
           target="_blank"
-          rel="noreferrer"
           onClick={handleWhatsappClick}
           className="inline-block mt-6 bg-green-600 text-white px-6 py-3 rounded"
         >
@@ -132,7 +161,7 @@ function BusinessDetails() {
 
       </div>
 
-    </div>
+    </>
 
   )
 }

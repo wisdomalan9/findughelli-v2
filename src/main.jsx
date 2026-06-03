@@ -6,6 +6,10 @@ import App from "./App"
 import "./index.css"
 
 import {
+  HelmetProvider
+} from "react-helmet-async"
+
+import {
   AuthProvider
 } from "./contexts/AuthContext"
 
@@ -17,7 +21,9 @@ ReactDOM.createRoot(
 
     <AuthProvider>
 
-      <App />
+      <HelmetProvider>
+  <App /
+></HelmetProvider>
 
     </AuthProvider>
 

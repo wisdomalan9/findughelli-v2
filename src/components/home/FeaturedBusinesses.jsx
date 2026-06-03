@@ -83,6 +83,7 @@ function FeaturedBusinesses() {
               <div className="bg-white rounded-xl overflow-hidden shadow hover:shadow-xl transition">
 
                 <img
+		loading="lazy"
                   src={
                     vendor.image ||
                     "https://via.placeholder.com/600x400"
