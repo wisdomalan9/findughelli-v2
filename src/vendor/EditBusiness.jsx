@@ -11,7 +11,10 @@ import {
   updateDoc
 } from "firebase/firestore"
 
-import { db } from "../firebase/firebase"
+import {
+  auth,
+  db
+} from "../firebase/firebase"
 
 function EditBusiness() {
 
@@ -43,6 +46,17 @@ function EditBusiness() {
       await getDoc(docRef)
 
     if (docSnap.exists()) {
+
+if (
+  docSnap.data().ownerId !==
+  auth.currentUser.uid
+) {
+
+  navigate("/")
+
+  return
+
+}
 
       setFormData(docSnap.data())
 

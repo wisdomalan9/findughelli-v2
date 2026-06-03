@@ -11,6 +11,8 @@ import {
   increment
 } from "firebase/firestore"
 
+import Loader from "../components/ui/Loader"
+
 import { db } from "../firebase/firebase"
 
 function BusinessDetails() {
@@ -71,7 +73,7 @@ function BusinessDetails() {
 
     return (
       <div className="p-10">
-        Loading...
+        <Loader />
       </div>
     )
 

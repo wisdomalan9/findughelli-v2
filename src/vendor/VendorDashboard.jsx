@@ -91,6 +91,35 @@ function VendorDashboard() {
 
       </div>
 
+{vendors.length === 0 && (
+
+  <div className="bg-white p-10 rounded-xl shadow text-center">
+
+    <h2 className="text-2xl font-bold mb-4">
+
+      No Businesses Yet
+
+    </h2>
+
+    <p className="mb-6">
+
+      Start by adding your first business.
+
+    </p>
+
+    <Link
+      to="/add-business"
+      className="bg-blue-700 text-white px-6 py-3 rounded"
+    >
+
+      Add Business
+
+    </Link>
+
+  </div>
+
+)}
+
       <div className="grid md:grid-cols-3 gap-6">
 
         {vendors.map((vendor) => (

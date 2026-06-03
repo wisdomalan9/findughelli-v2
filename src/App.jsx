@@ -57,10 +57,16 @@ function App() {
             element={<BusinessDetails />}
           />
 
-          <Route
-            path="add-business"
-            element={<AddBusiness />}
-          />
+<Route
+  path="add-business"
+  element={
+    <ProtectedRoute>
+
+      <AddBusiness />
+
+    </ProtectedRoute>
+  }
+/>
 
           <Route
             path="login"
