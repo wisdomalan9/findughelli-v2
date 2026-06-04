@@ -19,6 +19,8 @@ import ReviewForm from "../components/reviews/ReviewForm"
 
 import ReviewsList from "../components/reviews/ReviewsList"
 
+import FavoriteButton from "../components/favorites/FavoriteButton"
+
 import {
   Helmet
 } from "react-helmet-async"
@@ -146,6 +148,7 @@ function BusinessDetails() {
 
 <ReviewsList vendorId={vendor.id} />
 
+<FavoriteButton vendor={vendor} />
         </div>
 
         <a

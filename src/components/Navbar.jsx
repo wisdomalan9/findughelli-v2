@@ -60,6 +60,15 @@ function Navbar() {
             Add Business
           </Link>
 
+<Link
+  to="/favorites"
+  className="hover:text-blue-500"
+>
+
+  Favorites
+
+</Link>
+
           {user && (
 
             <Link to="/vendor-dashboard">

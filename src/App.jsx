@@ -18,6 +18,7 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import AdminDashboard from "./admin/AdminDashboard"
 import VendorDashboard from "./vendor/VendorDashboard"
 import EditBusiness from "./vendor/EditBusiness"
+import Favorites from "./pages/Favorites"
 
 function App() {
 
@@ -77,6 +78,11 @@ function App() {
             path="register"
             element={<Register />}
           />
+
+<Route
+  path="favorites"
+  element={<Favorites />}
+/>
 
           <Route
   path="admin"
