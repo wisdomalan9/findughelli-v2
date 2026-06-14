@@ -15,11 +15,17 @@ import Register from "./pages/Register"
 import AddBusiness from "./pages/AddBusiness"
 import BusinessDetails from "./pages/BusinessDetails"
 import ProtectedRoute from "./components/ProtectedRoute"
-import AdminDashboard from "./admin/AdminDashboard"
 import VendorDashboard from "./vendor/VendorDashboard"
 import EditBusiness from "./vendor/EditBusiness"
 import Favorites from "./pages/Favorites"
-
+import Jobs from "./pages/Jobs"
+import AddJob from "./pages/AddJob"
+import Events from "./pages/Events"
+import AddEvent from "./pages/AddEvent"
+import AdminDashboard from "./pages/AdminDashboard"
+import Create from "./pages/Create"
+import Notifications from "./pages/Notifications"
+import Profile from "./pages/Profile"
 function App() {
 
   return (
@@ -84,6 +90,12 @@ function App() {
   element={<Favorites />}
 />
 
+<Route
+  path="create"
+  element={<Create />}
+/>
+
+
           <Route
   path="admin"
   element={
@@ -115,6 +127,36 @@ function App() {
 
     </ProtectedRoute>
   }
+/>
+
+<Route
+  path="jobs"
+  element={<Jobs />}
+/>
+
+<Route
+  path="add-job"
+  element={<AddJob />}
+/>
+
+<Route
+  path="events"
+  element={<Events />}
+/>
+
+<Route
+  path="add-event"
+  element={<AddEvent />}
+/>
+
+<Route
+  path="notifications"
+  element={<Notifications />}
+/>
+
+<Route
+  path="profile"
+  element={<Profile />}
 />
 
         </Route>

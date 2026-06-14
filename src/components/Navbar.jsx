@@ -12,6 +12,12 @@ import {
   useAuth
 } from "../contexts/AuthContext"
 
+import {
+  FaBell,
+  FaUserCircle,
+  FaSearch
+} from "react-icons/fa"
+
 function Navbar() {
 
   const {
@@ -27,96 +33,120 @@ function Navbar() {
 
   return (
 
-    <nav className="bg-blue-700 text-white p-4">
+    <header className="sticky top-0 z-50 bg-white border-b shadow-sm">
 
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
+      <div className="max-w-7xl mx-auto px-4 py-3 flex items-center gap-4">
 
         <Link
           to="/"
-          className="text-2xl font-bold"
+          className="text-2xl font-black text-blue-600"
         >
+
           FindUghelli
+
         </Link>
 
-        <div className="flex gap-6 items-center">
+        <div className="flex-1 hidden md:block">
 
-          <Link to="/">
-            Home
-          </Link>
+          <div className="bg-gray-100 rounded-full px-4 py-2 flex items-center gap-2">
 
-          <Link to="/businesses">
-            Businesses
-          </Link>
+            <FaSearch className="text-gray-500" />
 
-          <Link to="/about">
-            About
-          </Link>
+            <input
+              type="text"
+              placeholder="Search businesses..."
+              className="bg-transparent outline-none w-full"
+            />
 
-          <Link to="/contact">
-            Contact
-          </Link>
+          </div>
 
-          <Link to="/add-business">
-            Add Business
-          </Link>
+        </div>
 
-<Link
-  to="/favorites"
-  className="hover:text-blue-500"
->
+        <div className="flex items-center gap-4 ml-auto">
 
-  Favorites
+          <button className="text-xl">
 
-</Link>
+            <FaBell />
 
-          {user && (
+          </button>
 
-            <Link to="/vendor-dashboard">
-              Dashboard
-            </Link>
+          {user ? (
 
-          )}
+            <div className="flex items-center gap-3">
 
-          {role === "admin" && (
+              <Link
+                to="/vendor-dashboard"
+                className="hidden md:block text-sm font-semibold"
+              >
 
-            <Link to="/admin">
-              Admin
-            </Link>
+                Dashboard
 
-          )}
-
-          {!user ? (
-
-            <>
-
-              <Link to="/login">
-                Login
               </Link>
 
-              <Link to="/register">
-                Register
-              </Link>
+              {role === "admin" && (
 
-            </>
+                <Link
+                  to="/admin"
+                  className="hidden md:block text-sm font-semibold text-red-500"
+                >
+
+                  Admin
+
+                </Link>
+
+              )}
+
+              <button
+                onClick={handleLogout}
+                className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
+              >
+
+                Logout
+
+              </button>
+
+            </div>
 
           ) : (
 
-            <button
-              onClick={handleLogout}
-              className="bg-black px-4 py-2 rounded"
-            >
-              Logout
-            </button>
+            <div className="flex items-center gap-3">
+
+              <Link
+                to="/login"
+                className="text-sm font-semibold"
+              >
+
+                Login
+
+              </Link>
+
+              <Link
+                to="/register"
+                className="bg-blue-600 text-white px-4 py-2 rounded-full text-sm"
+              >
+
+                Register
+
+              </Link>
+
+            </div>
 
           )}
+
+          <div className="text-2xl text-gray-700">
+
+            <FaUserCircle />
+
+          </div>
 
         </div>
 
       </div>
 
-    </nav>
+    </header>
 
   )
+
 }
 
 export default Navbar

@@ -10,7 +10,10 @@ import {
   collection,
   deleteDoc,
   doc,
-  getDocs
+  getDocs,
+  query,
+  where,
+  limit
 } from "firebase/firestore"
 
 function FavoriteButton({ vendor }) {
@@ -23,33 +26,59 @@ function FavoriteButton({ vendor }) {
 
   useEffect(() => {
 
-    checkFavorite()
+    if (vendor?.id) {
 
-  }, [])
+      checkFavorite()
+
+    }
+
+  }, [vendor])
 
   const checkFavorite = async () => {
 
-    if (!auth.currentUser) return
+    if (!auth.currentUser)
+      return
 
-    const snapshot =
-      await getDocs(
-        collection(db, "favorites")
+    try {
+
+      const q = query(
+        collection(db, "favorites"),
+
+        where(
+          "userId",
+          "==",
+          auth.currentUser.uid
+        ),
+
+        where(
+          "vendorId",
+          "==",
+          vendor.id
+        ),
+
+        limit(1)
       )
 
-    snapshot.forEach((docItem) => {
+      const snapshot =
+        await getDocs(q)
 
-      const data = docItem.data()
+      if (!snapshot.empty) {
 
-      if (
-        data.vendorId === vendor.id &&
-        data.userId === auth.currentUser.uid
-      ) {
+        setFavoriteId(
+          snapshot.docs[0].id
+        )
 
-        setFavoriteId(docItem.id)
+      } else {
+
+        setFavoriteId(null)
 
       }
 
-    })
+    } catch (error) {
+
+      console.error(error)
+
+    }
 
   }
 
@@ -57,7 +86,9 @@ function FavoriteButton({ vendor }) {
 
     if (!auth.currentUser) {
 
-      alert("Login required")
+      alert(
+        "Please login first"
+      )
 
       return
 
@@ -83,25 +114,41 @@ function FavoriteButton({ vendor }) {
 
         const docRef =
           await addDoc(
-            collection(db, "favorites"),
+            collection(
+              db,
+              "favorites"
+            ),
             {
               userId:
                 auth.currentUser.uid,
-              vendorId: vendor.id,
+
+              vendorId:
+                vendor.id,
+
               vendorName:
                 vendor.name,
+
+              vendorImage:
+                vendor.image || "",
+
               createdAt:
                 new Date(),
             }
           )
 
-        setFavoriteId(docRef.id)
+        setFavoriteId(
+          docRef.id
+        )
 
       }
 
     } catch (error) {
 
-      alert(error.message)
+      console.error(error)
+
+      alert(
+        error.message
+      )
 
     }
 
@@ -114,16 +161,29 @@ function FavoriteButton({ vendor }) {
     <button
       onClick={toggleFavorite}
       disabled={loading}
-      className="bg-red-500 text-white px-4 py-2 rounded"
+      className={`
+        py-4
+        rounded-2xl
+        font-bold
+        transition
+        ${
+          favoriteId
+            ? "bg-red-500 text-white"
+            : "bg-gray-100 text-gray-700"
+        }
+      `}
     >
 
-      {favoriteId
-        ? "Remove Favorite"
-        : "Add To Favorites"}
+      {loading
+        ? "Loading..."
+        : favoriteId
+        ? "❤️ Saved"
+        : "🤍 Save"}
 
     </button>
 
   )
+
 }
 
 export default FavoriteButton

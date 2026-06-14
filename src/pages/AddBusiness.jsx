@@ -1,124 +1,193 @@
 import axios from "axios"
 
 import { useState } from "react"
-import { auth } from "../firebase/firebase"
+
 import {
   collection,
   addDoc,
   serverTimestamp
 } from "firebase/firestore"
 
-import { db } from "../firebase/firebase"
+import {
+  auth,
+  db
+} from "../firebase/firebase"
+
+import {
+  sendVendorEmail
+} from "../services/emailService"
 
 function AddBusiness() {
 
-  const [formData, setFormData] = useState({
-    name: "",
-    category: "",
-    description: "",
-    phone: "",
-    address: "",
-    image: "",
-  })
+  const [uploading, setUploading] =
+    useState(false)
+
+  const [formData, setFormData] =
+    useState({
+      name: "",
+      category: "",
+      description: "",
+      phone: "",
+      address: "",
+      email: "",
+      image: "",
+    })
 
   const handleChange = (e) => {
 
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [e.target.name]:
+        e.target.value,
     })
 
   }
 
-  const handleImageUpload = async (e) => {
+  const handleImageUpload =
+    async (e) => {
 
-    const file = e.target.files[0]
+      const file =
+        e.target.files[0]
 
-    const data = new FormData()
+      if (!file) return
 
-    data.append("file", file)
+      const data = new FormData()
 
-    data.append(
-      "upload_preset",
-      "findughelli_upload"
-    )
+      data.append("file", file)
 
-    try {
+      data.append(
+        "upload_preset",
+        "findughelli_upload"
+      )
 
-      const response =
-        await axios.post(
+      try {
 
-          "https://api.cloudinary.com/v1_1/dwl4ix6uu/image/upload",
+        setUploading(true)
 
-          data
+        const response =
+          await axios.post(
+
+            "https://api.cloudinary.com/v1_1/dwl4ix6uu/image/upload",
+
+            data
+          )
+
+        setFormData({
+          ...formData,
+          image:
+            response.data
+              .secure_url,
+        })
+
+        alert(
+          "Image uploaded successfully"
         )
 
-      setFormData({
-        ...formData,
-        image: response.data.secure_url,
-      })
+        setUploading(false)
 
-      alert("Image uploaded successfully")
+      } catch (error) {
 
-    } catch (error) {
+        console.log(error)
 
-      console.log(error)
+        alert("Upload failed")
 
-      alert("Upload failed")
+        setUploading(false)
 
-    }
-
-  }
-
-  const handleSubmit = async (e) => {
-
-    e.preventDefault()
-
-    try {
-
-await addDoc(
-  collection(db, "vendors"),
-  {
-    ...formData,
-
-    ownerId: auth.currentUser.uid,
-
-    featured: false,
-    premium: false,
-    approved: false,
-    views: 0,
-whatsappClicks: 0,
-    rating: 0,
-    reviews: 0,
-    createdAt: serverTimestamp(),
-  }
-)
-
-      alert("Business submitted successfully")
-
-      setFormData({
-        name: "",
-        category: "",
-        description: "",
-        phone: "",
-        address: "",
-        image: "",
-      })
-
-    } catch (error) {
-
-      alert(error.message)
+      }
 
     }
 
-  }
+  const handleSubmit =
+    async (e) => {
+
+      e.preventDefault()
+
+      if (
+        !formData.name ||
+        !formData.category ||
+        !formData.description ||
+        !formData.phone ||
+        !formData.address ||
+        !formData.email
+      ) {
+
+        alert(
+          "Please fill all fields"
+        )
+
+        return
+
+      }
+
+      try {
+
+        await addDoc(
+          collection(
+            db,
+            "vendors"
+          ),
+          {
+            ...formData,
+
+            ownerId:
+              auth.currentUser
+                ?.uid || "",
+
+            featured: false,
+
+            premium: false,
+
+            approved: false,
+
+            views: 0,
+
+            whatsappClicks: 0,
+
+            rating: 0,
+
+            reviews: 0,
+
+            createdAt:
+              serverTimestamp(),
+          }
+        )
+
+        await sendVendorEmail(
+          formData
+        )
+
+        alert(
+          "Business submitted successfully"
+        )
+
+        setFormData({
+          name: "",
+          category: "",
+          description: "",
+          phone: "",
+          address: "",
+          email: "",
+          image: "",
+        })
+
+      } catch (error) {
+
+        console.log(error)
+
+        alert(error.message)
+
+      }
+
+    }
 
   return (
 
     <div className="max-w-2xl mx-auto p-10">
 
       <h1 className="text-4xl font-bold mb-8">
+
         Add Your Business
+
       </h1>
 
       <form
@@ -139,8 +208,20 @@ whatsappClicks: 0,
           type="file"
           accept="image/*"
           className="w-full border p-3 rounded"
-          onChange={handleImageUpload}
+          onChange={
+            handleImageUpload
+          }
         />
+
+        {formData.image && (
+
+          <img
+            src={formData.image}
+            alt="Preview"
+            className="w-full h-48 object-cover rounded"
+          />
+
+        )}
 
         <input
           type="text"
@@ -156,7 +237,9 @@ whatsappClicks: 0,
           placeholder="Description"
           className="w-full border p-3 rounded"
           rows="5"
-          value={formData.description}
+          value={
+            formData.description
+          }
           onChange={handleChange}
         />
 
@@ -178,10 +261,24 @@ whatsappClicks: 0,
           onChange={handleChange}
         />
 
+        <input
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          className="w-full border p-3 rounded"
+          value={formData.email}
+          onChange={handleChange}
+        />
+
         <button
-          className="bg-blue-700 text-white px-6 py-3 rounded w-full"
+          disabled={uploading}
+          className="bg-blue-700 text-white px-6 py-3 rounded w-full disabled:opacity-50"
         >
-          Submit Business
+
+          {uploading
+            ? "Uploading..."
+            : "Submit Business"}
+
         </button>
 
       </form>
@@ -189,6 +286,7 @@ whatsappClicks: 0,
     </div>
 
   )
+
 }
 
 export default AddBusiness

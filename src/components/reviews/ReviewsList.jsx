@@ -1,103 +1,170 @@
 import {
-  useEffect,
-  useState
+useEffect,
+useState
 } from "react"
 
 import {
-  collection,
-  getDocs
+collection,
+onSnapshot,
+query,
+where,
+orderBy
 } from "firebase/firestore"
 
 import { db } from "../../firebase/firebase"
 
 function ReviewsList({ vendorId }) {
 
-  const [reviews, setReviews] =
-    useState([])
+const [reviews, setReviews] =
+useState([])
 
-  useEffect(() => {
+const [loading, setLoading] =
+useState(true)
 
-    fetchReviews()
+useEffect(() => {
 
-  }, [])
+const q = query(
+  collection(db, "reviews"),
+  where(
+    "vendorId",
+    "==",
+    vendorId
+  ),
+  where(
+    "approved",
+    "==",
+    true
+  ),
+  orderBy(
+    "createdAt",
+    "desc"
+  )
+)
 
-  const fetchReviews = async () => {
+const unsubscribe =
+  onSnapshot(
+    q,
+    (snapshot) => {
 
-    const querySnapshot =
-      await getDocs(
-        collection(db, "reviews")
+      const reviewsData = []
+
+      snapshot.forEach(
+        (docItem) => {
+
+          reviewsData.push({
+            id: docItem.id,
+            ...docItem.data(),
+          })
+
+        }
       )
 
-    const reviewsData = []
+      setReviews(reviewsData)
+      setLoading(false)
 
-    querySnapshot.forEach((docItem) => {
+    }
+  )
 
-      const data = docItem.data()
+return () => unsubscribe()
 
-      if (
-        data.vendorId === vendorId &&
-        data.approved === true
-      ) {
+}, [vendorId])
 
-        reviewsData.push({
-          id: docItem.id,
-          ...data,
-        })
+if (loading) {
 
-      }
+return (
 
-    })
+  <div className="mt-6">
 
-    setReviews(reviewsData)
+    <p className="text-gray-500">
 
-  }
+      Loading reviews...
 
-  return (
+    </p>
 
-    <div className="mt-10">
+  </div>
 
-      <h2 className="text-3xl font-bold mb-6">
+)
 
-        Reviews
+}
 
-      </h2>
+if (reviews.length === 0) {
 
-      <div className="space-y-4">
+return (
 
-        {reviews.map((review) => (
+  <div className="mt-6">
 
-          <div
-            key={review.id}
-            className="bg-white p-6 rounded-xl shadow"
-          >
+    <p className="text-gray-500">
 
-            <div className="flex items-center justify-between mb-2">
+      No reviews yet.
 
-              <h3 className="font-bold">
+    </p>
 
-                {review.userName}
+  </div>
 
-              </h3>
+)
 
-              <p>
-                ⭐ {review.rating}/5
-              </p>
+}
 
-            </div>
+return (
 
-            <p>
-              {review.comment}
-            </p>
+<div className="mt-6">
+
+  <div className="space-y-4">
+
+    {reviews.map(
+      (review) => (
+
+        <div
+          key={review.id}
+          className="bg-white p-5 rounded-2xl shadow-sm border"
+        >
+
+          <div className="flex justify-between items-center mb-2">
+
+            <h3 className="font-bold">
+
+              {review.userName ||
+                "Anonymous"}
+
+            </h3>
+
+            <span className="font-semibold text-yellow-600">
+
+              ⭐ {review.rating}/5
+
+            </span>
 
           </div>
 
-        ))}
+          <p className="text-gray-700">
 
-      </div>
+            {review.comment}
 
-    </div>
+          </p>
 
-  )
+          {review.createdAt && (
+
+            <p className="text-xs text-gray-400 mt-3">
+
+              {new Date(
+                review.createdAt?.seconds * 1000
+              ).toLocaleDateString()}
+
+            </p>
+
+          )}
+
+        </div>
+
+      )
+    )}
+
+  </div>
+
+</div>
+
+)
+
 }
 
 export default ReviewsList

@@ -1,19 +1,40 @@
 import Navbar from "../components/Navbar"
 import Footer from "../components/Footer"
-import { Outlet } from "react-router-dom"
+import MobileNav from "../components/MobileNav"
+import FloatingButton from "../components/FloatingButton"
+
+import {
+  Outlet
+} from "react-router-dom"
 
 function MainLayout() {
+
   return (
-    <>
+
+    <div className="bg-gray-100 min-h-screen">
+
       <Navbar />
 
-      <main>
+      <main className="pb-28">
+
         <Outlet />
+
       </main>
 
-      <Footer />
-    </>
+      <FloatingButton />
+
+      <MobileNav />
+
+      <div className="hidden md:block">
+
+        <Footer />
+
+      </div>
+
+    </div>
+
   )
+
 }
 
 export default MainLayout

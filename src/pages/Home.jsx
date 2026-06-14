@@ -1,61 +1,180 @@
 import {
-  Helmet
+useEffect,
+useState
+} from "react"
+
+import {
+Helmet
 } from "react-helmet-async"
+
+import {
+collection,
+onSnapshot,
+query,
+orderBy
+} from "firebase/firestore"
+
+import { db } from "../firebase/firebase"
+
+import Stories from "../components/home/Stories"
+
+import CategoryChips from "../components/home/CategoryChips"
+
+import FeedPost from "../components/feed/FeedPost"
+
+import LiveStats from "../components/home/LiveStats"
+
+import Loader from "../components/ui/Loader"
+
+import CreatePost from "../components/feed/CreatePost"
 
 function Home() {
 
-  return (
+const [vendors, setVendors] =
+useState([])
 
-    <>
+const [loading, setLoading] =
+useState(true)
 
-      <Helmet>
+useEffect(() => {
 
-        <title>
-          FindUghelli - Discover Businesses In Ughelli
-        </title>
+const q = query(
+  collection(db, "vendors"),
+  orderBy("createdAt", "desc")
+)
 
-        <meta
-          name="description"
-          content="Find businesses, restaurants, hotels, mechanics, fashion stores, and services in Ughelli."
-        />
+const unsubscribe =
+  onSnapshot(q, (snapshot) => {
 
-        <meta
-          property="og:title"
-          content="FindUghelli"
-        />
+    const vendorsData = []
 
-        <meta
-          property="og:description"
-          content="Discover businesses in Ughelli"
-        />
+    snapshot.forEach((docItem) => {
 
-      </Helmet>
+      vendorsData.push({
+        id: docItem.id,
+        ...docItem.data(),
+      })
 
-      <div className="max-w-7xl mx-auto p-10">
+    })
 
-        <div className="bg-blue-700 text-white rounded-2xl p-10 text-center">
+    setVendors(vendorsData)
 
-          <h1 className="text-5xl font-bold mb-6">
+    setLoading(false)
 
-            Discover Businesses In Ughelli
+  })
 
-          </h1>
+return () => unsubscribe()
 
-          <p className="text-xl mb-8">
+}, [])
 
-            Find restaurants, hotels,
-            mechanics, salons, fashion
-            stores and more.
+if (loading) {
+
+return <Loader />
+
+}
+
+const approvedVendors =
+vendors
+.filter(
+(vendor) =>
+vendor.approved === true
+)
+.sort((a, b) => {
+
+    const scoreA =
+      (a.views || 0) +
+      ((a.likes || 0) * 2) +
+      (a.premium ? 100 : 0) +
+      (a.featured ? 50 : 0)
+
+    const scoreB =
+      (b.views || 0) +
+      ((b.likes || 0) * 2) +
+      (b.premium ? 100 : 0) +
+      (b.featured ? 50 : 0)
+
+    return scoreB - scoreA
+
+  })
+
+return (
+
+<>
+
+  <Helmet>
+
+    <title>
+      FindUghelli - Discover Businesses In Ughelli
+    </title>
+
+    <meta
+      name="description"
+      content="Find businesses, restaurants, hotels, mechanics, fashion stores, and services in Ughelli."
+    />
+
+  </Helmet>
+
+  <div className="max-w-3xl mx-auto px-4 py-4">
+
+    <Stories />
+
+    <CreatePost />
+
+    <CategoryChips />
+
+    <LiveStats
+      totalBusinesses={
+        approvedVendors.length
+      }
+    />
+
+    <div className="mt-6">
+
+      <h2 className="text-2xl font-bold mb-4">
+
+        🔥 Trending Businesses
+
+      </h2>
+
+      {approvedVendors.length === 0 && (
+
+        <div className="bg-white rounded-3xl p-8 text-center shadow-sm">
+
+          <h3 className="text-xl font-bold">
+
+            No Businesses Yet
+
+          </h3>
+
+          <p className="text-gray-500 mt-2">
+
+            Businesses will appear here once approved.
 
           </p>
 
         </div>
 
-      </div>
+      )}
 
-    </>
+      {approvedVendors.map(
+        (vendor) => (
 
-  )
+          <FeedPost
+            key={vendor.id}
+            vendor={vendor}
+          />
+
+        )
+      )}
+
+    </div>
+
+  </div>
+
+</>
+
+)
+
 }
 
 export default Home

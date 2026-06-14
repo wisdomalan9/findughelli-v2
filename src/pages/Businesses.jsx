@@ -2,17 +2,31 @@ import { useEffect, useState } from "react"
 
 import {
   collection,
-  getDocs
+  onSnapshot,
+  query,
+  orderBy
 } from "firebase/firestore"
 
 import { db } from "../firebase/firebase"
 
-import { Link } from "react-router-dom"
+import BusinessCard from "../components/cards/BusinessCard"
+
+const categories = [
+  "All",
+  "Restaurant",
+  "Hotel",
+  "Fashion",
+  "Hospital",
+  "Mechanic",
+]
 
 function Businesses() {
 
   const [vendors, setVendors] =
     useState([])
+
+  const [loading, setLoading] =
+    useState(true)
 
   const [search, setSearch] =
     useState("")
@@ -31,91 +45,223 @@ function Businesses() {
 
   useEffect(() => {
 
-    const fetchVendors = async () => {
+    const q = query(
+      collection(db, "vendors"),
+      orderBy("createdAt", "desc")
+    )
 
-      const querySnapshot =
-        await getDocs(
-          collection(db, "vendors")
-        )
+    const unsubscribe =
+      onSnapshot(q, (snapshot) => {
 
-      const vendorsData = []
+        const vendorsData = []
 
-      querySnapshot.forEach((docItem) => {
+        snapshot.forEach((docItem) => {
 
-        vendorsData.push({
-          id: docItem.id,
-          ...docItem.data(),
+          vendorsData.push({
+            id: docItem.id,
+            ...docItem.data(),
+          })
+
         })
+
+        setVendors(vendorsData)
+
+        setLoading(false)
 
       })
 
-      setVendors(vendorsData)
-
-    }
-
-    fetchVendors()
+    return () => unsubscribe()
 
   }, [])
 
+  if (loading) {
+
+    return (
+
+      <div className="max-w-5xl mx-auto px-4 py-10">
+
+        <div className="animate-pulse space-y-4">
+
+          <div className="h-24 bg-gray-200 rounded-2xl"></div>
+
+          <div className="h-40 bg-gray-200 rounded-2xl"></div>
+
+          <div className="h-40 bg-gray-200 rounded-2xl"></div>
+
+        </div>
+
+      </div>
+
+    )
+
+  }
+
+  const filteredVendors =
+    vendors
+
+      .filter((vendor) => {
+
+        return (
+          vendor.approved === true
+        )
+
+      })
+
+      .filter((vendor) => {
+
+        return vendor.name
+          ?.toLowerCase()
+          .includes(
+            search.toLowerCase()
+          )
+
+      })
+
+      .filter((vendor) => {
+
+        if (!category)
+          return true
+
+        return (
+          vendor.category ===
+          category
+        )
+
+      })
+
+      .filter((vendor) => {
+
+        if (!featuredOnly)
+          return true
+
+        return (
+          vendor.featured === true
+        )
+
+      })
+
+      .filter((vendor) => {
+
+        if (!premiumOnly)
+          return true
+
+        return (
+          vendor.premium === true
+        )
+
+      })
+
+      .sort((a, b) => {
+
+        if (
+          sortBy === "rating"
+        ) {
+
+          return (
+            (b.rating || 0) -
+            (a.rating || 0)
+          )
+
+        }
+
+        if (
+          sortBy === "views"
+        ) {
+
+          return (
+            (b.views || 0) -
+            (a.views || 0)
+          )
+
+        }
+
+        return 0
+
+      })
+
   return (
 
-    <div className="max-w-7xl mx-auto p-10">
+    <div className="max-w-5xl mx-auto px-4 py-6">
 
-      <h1 className="text-4xl font-bold mb-8">
+      <div className="mb-6">
 
-        Businesses
+<h1 className="text-4xl font-black">
 
-      </h1>
+  Explore Ughelli
+
+</h1>
+
+        <p className="text-gray-500 mt-1">
+
+Find restaurants, hotels, mechanics, fashion stores and local services.
+
+        </p>
+
+        <p className="text-sm text-blue-600 mt-2 font-medium">
+
+          {filteredVendors.length}
+          {" "}
+          businesses found
+
+        </p>
+
+      </div>
 
       <input
         type="text"
         placeholder="Search businesses..."
-        className="w-full border p-3 rounded mb-8"
+        
+className="w-full bg-white rounded-2xl px-5 py-4 outline-none shadow-sm mb-6 border border-gray-100"
         value={search}
         onChange={(e) =>
-          setSearch(e.target.value)
+          setSearch(
+            e.target.value
+          )
         }
       />
 
-      <div className="grid md:grid-cols-4 gap-4 mb-8">
+      <div className="sticky top-20 z-20 bg-white/95 backdrop-blur p-4 rounded-2xl shadow-sm mb-6 grid md:grid-cols-4 gap-4 border">
+
+<div className="overflow-x-auto">
+
+  <div className="flex gap-3">
+
+    {categories.map((item) => (
+
+      <button
+        key={item}
+        onClick={() =>
+          setCategory(
+            item === "All"
+              ? ""
+              : item
+          )
+        }
+        className={`px-4 py-2 rounded-full whitespace-nowrap ${
+          category === item ||
+          (item === "All" &&
+            category === "")
+            ? "bg-blue-600 text-white"
+            : "bg-gray-100"
+        }`}
+      >
+
+        {item}
+
+      </button>
+
+    ))}
+
+  </div>
+
+</div>
 
         <select
-          className="border p-3 rounded"
+          className="border p-3 rounded-xl"
           onChange={(e) =>
-            setCategory(e.target.value)
-          }
-        >
-
-          <option value="">
-            All Categories
-          </option>
-
-          <option value="Restaurant">
-            Restaurant
-          </option>
-
-          <option value="Hotel">
-            Hotel
-          </option>
-
-          <option value="Fashion">
-            Fashion
-          </option>
-
-          <option value="Hospital">
-            Hospital
-          </option>
-
-          <option value="Mechanic">
-            Mechanic
-          </option>
-
-        </select>
-
-        <select
-          className="border p-3 rounded"
-          onChange={(e) =>
-            setSortBy(e.target.value)
+            setSortBy(
+              e.target.value
+            )
           }
         >
 
@@ -133,7 +279,7 @@ function Businesses() {
 
         </select>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm font-medium">
 
           <input
             type="checkbox"
@@ -148,7 +294,7 @@ function Businesses() {
 
         </label>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 text-sm font-medium">
 
           <input
             type="checkbox"
@@ -165,181 +311,102 @@ function Businesses() {
 
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+<div className="bg-white rounded-3xl p-5 mb-6 shadow-sm">
 
-        {vendors
+  <h2 className="font-bold text-xl mb-4">
 
-          .filter((vendor) => {
+    🔥 Trending Today
 
-            return (
-              vendor.approved === true
-            )
+  </h2>
 
-          })
+  <div className="flex justify-between">
 
-          .filter((vendor) => {
+    <div>
 
-            return vendor.name
-              ?.toLowerCase()
-              .includes(
-                search.toLowerCase()
-              )
+      <p className="text-2xl font-black">
 
-          })
+        {
+          vendors.filter(
+            vendor =>
+              vendor.approved
+          ).length
+        }
 
-          .filter((vendor) => {
+      </p>
 
-            if (!category)
-              return true
+      <p className="text-gray-500">
 
-            return (
-              vendor.category ===
-              category
-            )
+        Businesses
 
-          })
+      </p>
 
-          .filter((vendor) => {
+    </div>
 
-            if (!featuredOnly)
-              return true
+    <div>
 
-            return (
-              vendor.featured === true
-            )
+      <p className="text-2xl font-black">
 
-          })
+        {
+          vendors.filter(
+            vendor =>
+              vendor.featured
+          ).length
+        }
 
-          .filter((vendor) => {
+      </p>
 
-            if (!premiumOnly)
-              return true
+      <p className="text-gray-500">
 
-            return (
-              vendor.premium === true
-            )
+        Featured
 
-          })
+      </p>
 
-          .sort((a, b) => {
+    </div>
 
-            if (
-              sortBy === "rating"
-            ) {
+    <div>
 
-              return (
-                (b.rating || 0) -
-                (a.rating || 0)
-              )
+      <p className="text-2xl font-black">
 
-            }
+        {
+          vendors.filter(
+            vendor =>
+              vendor.premium
+          ).length
+        }
 
-            if (
-              sortBy === "views"
-            ) {
+      </p>
 
-              return (
-                (b.views || 0) -
-                (a.views || 0)
-              )
+      <p className="text-gray-500">
 
-            }
+        Premium
 
-            return 0
+      </p>
 
-          })
+    </div>
 
-          .map((vendor) => (
+  </div>
 
-            <Link
-              to={`/business/${vendor.id}`}
-              key={vendor.id}
-            >
+</div>
 
-              <div className="border p-6 rounded-xl shadow hover:shadow-lg transition">
+      <div className="space-y-5">
 
-                <img
-                  loading="lazy"
-                  src={vendor.image}
-                  alt={vendor.name}
-                  className="w-full h-48 object-cover rounded mb-4"
-                />
+        {filteredVendors.map(
+          (vendor) => (
 
-                <div className="flex items-center gap-2 mb-2">
+          <BusinessCard
+            key={vendor.id}
+            vendor={vendor}
+          />
 
-                  <h2 className="text-2xl font-bold">
-
-                    {vendor.name}
-
-                  </h2>
-
-                  {vendor.featured && (
-
-                    <span className="bg-yellow-400 text-black text-xs px-2 py-1 rounded">
-
-                      Featured
-
-                    </span>
-
-                  )}
-
-                  {vendor.premium && (
-
-                    <span className="bg-purple-600 text-white text-xs px-2 py-1 rounded">
-
-                      Premium
-
-                    </span>
-
-                  )}
-
-                </div>
-
-                <span className="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm mb-3">
-
-                  {vendor.category}
-
-                </span>
-
-                <p className="mb-4">
-
-                  {vendor.description}
-
-                </p>
-
-                <p>
-                  {vendor.phone}
-                </p>
-
-                <p>
-                  {vendor.address}
-                </p>
-
-                <div className="flex gap-4 mt-4 text-sm text-gray-600">
-
-                  <p>
-                    ⭐ {vendor.rating || 0}
-                  </p>
-
-                  <p>
-                    👁 {vendor.views || 0}
-                  </p>
-
-                </div>
-
-              </div>
-
-            </Link>
-
-          ))}
+        ))}
 
       </div>
 
-      {vendors.length === 0 && (
+      {filteredVendors.length === 0 && (
 
-        <div className="text-center py-20">
+        <div className="bg-white rounded-2xl p-10 text-center shadow-sm mt-6">
 
-          <h2 className="text-3xl font-bold mb-4">
+          <h2 className="text-2xl font-bold mb-3">
 
             No businesses found
 
@@ -347,7 +414,7 @@ function Businesses() {
 
           <p className="text-gray-500">
 
-            Try adjusting filters
+            Try adjusting your filters
 
           </p>
 
