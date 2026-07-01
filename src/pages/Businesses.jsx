@@ -107,27 +107,22 @@ function Businesses() {
 
       })
 
-      .filter((vendor) => {
+.filter((vendor) => {
+  const keyword = search.toLowerCase()
 
-        return vendor.name
-          ?.toLowerCase()
-          .includes(
-            search.toLowerCase()
-          )
+  return (
+    vendor.name?.toLowerCase().includes(keyword) ||
+    vendor.category?.toLowerCase().includes(keyword) ||
+    vendor.description?.toLowerCase().includes(keyword) ||
+    vendor.address?.toLowerCase().includes(keyword)
+  )
+})
 
-      })
+.filter((vendor) => {
+  if (!category) return true
 
-      .filter((vendor) => {
-
-        if (!category)
-          return true
-
-        return (
-          vendor.category ===
-          category
-        )
-
-      })
+  return vendor.category === category
+})
 
       .filter((vendor) => {
 
@@ -151,33 +146,20 @@ function Businesses() {
 
       })
 
-      .sort((a, b) => {
+.sort((a, b) => {
+  if (a.featured && !b.featured) return -1
+  if (!a.featured && b.featured) return 1
 
-        if (
-          sortBy === "rating"
-        ) {
+  if (sortBy === "rating") {
+    return (b.rating || 0) - (a.rating || 0)
+  }
 
-          return (
-            (b.rating || 0) -
-            (a.rating || 0)
-          )
+  if (sortBy === "views") {
+    return (b.views || 0) - (a.views || 0)
+  }
 
-        }
-
-        if (
-          sortBy === "views"
-        ) {
-
-          return (
-            (b.views || 0) -
-            (a.views || 0)
-          )
-
-        }
-
-        return 0
-
-      })
+  return 0
+})
 
   return (
 
