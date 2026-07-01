@@ -30,8 +30,9 @@ function AddBusiness() {
       phone: "",
       address: "",
       email: "",
-      image: "",
-	images: [],
+mapLink: "",
+image: "",
+images: [],
     })
 
   const handleChange = (e) => {
@@ -147,9 +148,11 @@ createdAt: serverTimestamp(),
           description: "",
           phone: "",
           address: "",
-          email: "",
-          image: "",
-	images: [],
+email: "",
+mapLink: "",
+image: "",
+images: [],
+
         })
 
       } catch (error) {
@@ -253,6 +256,15 @@ createdAt: serverTimestamp(),
           value={formData.email}
           onChange={handleChange}
         />
+
+<input
+  type="url"
+  name="mapLink"
+  placeholder="Google Maps Link (Optional, but important)"
+  className="w-full border p-3 rounded"
+  value={formData.mapLink}
+  onChange={handleChange}
+/>
 
         <button
           disabled={uploading}

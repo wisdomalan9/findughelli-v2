@@ -284,7 +284,7 @@ src={selectedImage}
 
         </div>
 
-        <div className="grid grid-cols-2 gap-3 px-4 mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 px-4 mt-4">
 
           <a
             href={`https://wa.me/${vendor.phone}`}
@@ -302,6 +302,27 @@ src={selectedImage}
             vendor={vendor}
           />
 
+{vendor.mapLink && (
+  <a
+    href={vendor.mapLink}
+    target="_blank"
+    rel="noreferrer"
+    className="bg-blue-600 text-white py-4 rounded-2xl text-center font-bold"
+  >
+    📍 View Map
+  </a>
+)}
+
+{vendor.mapLink && (
+  <a
+    href={vendor.mapLink}
+    target="_blank"
+    rel="noreferrer"
+    className="bg-indigo-600 text-white py-4 rounded-2xl text-center font-bold"
+  >
+    🧭 Directions
+  </a>
+)}
         </div>
 
         <div className="bg-white rounded-3xl p-5 mx-4 mt-4 shadow-sm">
