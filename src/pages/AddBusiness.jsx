@@ -1,4 +1,4 @@
-import axios from "axios"
+import { uploadImage } from "../services/cloudinaryService"
 
 import { useState } from "react"
 
@@ -31,6 +31,7 @@ function AddBusiness() {
       address: "",
       email: "",
       image: "",
+	images: [],
     })
 
   const handleChange = (e) => {
@@ -43,59 +44,35 @@ function AddBusiness() {
 
   }
 
-  const handleImageUpload =
-    async (e) => {
+const handleImageUpload = async (e) => {
+  const files = Array.from(e.target.files)
 
-      const file =
-        e.target.files[0]
+  if (files.length === 0) return
 
-      if (!file) return
+  try {
+    setUploading(true)
 
-      const data = new FormData()
+    const uploadedImages = await Promise.all(
+      files.map(async (file) => {
+        const result = await uploadImage(file)
+        return result.secure_url
+      })
+    )
 
-      data.append("file", file)
+    setFormData((prev) => ({
+      ...prev,
+      image: uploadedImages[0],
+      images: uploadedImages,
+    }))
 
-      data.append(
-        "upload_preset",
-        "findughelli_upload"
-      )
-
-      try {
-
-        setUploading(true)
-
-        const response =
-          await axios.post(
-
-            "https://api.cloudinary.com/v1_1/dwl4ix6uu/image/upload",
-
-            data
-          )
-
-        setFormData({
-          ...formData,
-          image:
-            response.data
-              .secure_url,
-        })
-
-        alert(
-          "Image uploaded successfully"
-        )
-
-        setUploading(false)
-
-      } catch (error) {
-
-        console.log(error)
-
-        alert("Upload failed")
-
-        setUploading(false)
-
-      }
-
-    }
+    alert("Images uploaded successfully")
+  } catch (error) {
+    console.error(error)
+    alert("Upload failed")
+  } finally {
+    setUploading(false)
+  }
+}
 
   const handleSubmit =
     async (e) => {
@@ -118,6 +95,11 @@ function AddBusiness() {
         return
 
       }
+
+if (formData.images.length === 0) {
+  alert("Please upload at least one business image.")
+  return
+}
 
       try {
 
@@ -143,12 +125,11 @@ function AddBusiness() {
 
             whatsappClicks: 0,
 
-            rating: 0,
+rating: 0,
 
-            reviews: 0,
+reviewCount: 0,
 
-            createdAt:
-              serverTimestamp(),
+createdAt: serverTimestamp(),
           }
         )
 
@@ -168,6 +149,7 @@ function AddBusiness() {
           address: "",
           email: "",
           image: "",
+	images: [],
         })
 
       } catch (error) {
@@ -204,24 +186,26 @@ function AddBusiness() {
           onChange={handleChange}
         />
 
-        <input
-          type="file"
-          accept="image/*"
-          className="w-full border p-3 rounded"
-          onChange={
-            handleImageUpload
-          }
-        />
+<input
+  type="file"
+  accept="image/*"
+  multiple
+  className="w-full border p-3 rounded"
+  onChange={handleImageUpload}
+/>
 
-        {formData.image && (
-
-          <img
-            src={formData.image}
-            alt="Preview"
-            className="w-full h-48 object-cover rounded"
-          />
-
-        )}
+{formData.images.length > 0 && (
+  <div className="grid grid-cols-3 gap-3">
+    {formData.images.map((image, index) => (
+      <img
+        key={index}
+        src={image}
+        alt={`Preview ${index + 1}`}
+        className="h-32 w-full object-cover rounded"
+      />
+    ))}
+  </div>
+)}
 
         <input
           type="text"

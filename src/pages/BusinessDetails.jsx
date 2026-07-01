@@ -19,6 +19,8 @@ import { Helmet } from "react-helmet-async"
 
 import { db } from "../firebase/firebase"
 
+import { useAuth } from "../contexts/AuthContext"
+
 import Loader from "../components/ui/Loader"
 
 import ReviewForm from "../components/reviews/ReviewForm"
@@ -32,12 +34,16 @@ import CommentsList from "../components/comments/CommentsList"
 function BusinessDetails() {
 
   const { id } = useParams()
+const { user } = useAuth()
 
   const [vendor, setVendor] =
     useState(null)
 
   const [comments, setComments] =
     useState([])
+
+const [selectedImage, setSelectedImage] =
+  useState("")
 
   useEffect(() => {
 
@@ -58,10 +64,18 @@ function BusinessDetails() {
           }
         )
 
-        setVendor({
-          id: docSnap.id,
-          ...docSnap.data(),
-        })
+const vendorData = {
+  id: docSnap.id,
+  ...docSnap.data(),
+}
+
+setVendor(vendorData)
+
+setSelectedImage(
+  vendorData.image ||
+  vendorData.images?.[0] ||
+  "https://via.placeholder.com/800x500"
+)
 
       }
 
@@ -124,31 +138,29 @@ function BusinessDetails() {
 
     }
 
-  const handleAddComment =
-    async (
-      commentText
-    ) => {
+const handleAddComment = async (commentText) => {
 
-      await addDoc(
+  if (!user) {
+    alert("Please login to post a comment.")
+    return
+  }
 
-        collection(
-          db,
-          "vendors",
-          id,
-          "comments"
-        ),
-
-        {
-          text: commentText,
-          userName:
-            "FindUghelli User",
-          createdAt:
-            serverTimestamp(),
-        }
-
-      )
-
+  await addDoc(
+    collection(
+      db,
+      "vendors",
+      id,
+      "comments"
+    ),
+    {
+      text: commentText,
+      userId: user.uid,
+      userName: user.displayName || user.email,
+      createdAt: serverTimestamp(),
     }
+  )
+
+}
 
   if (!vendor) {
 
@@ -179,10 +191,8 @@ function BusinessDetails() {
 
           <img
             loading="lazy"
-            src={
-              vendor.image ||
-              "https://via.placeholder.com/800x500"
-            }
+src={selectedImage}
+
             alt={vendor.name}
             className="w-full h-72 object-cover"
           />
@@ -200,6 +210,27 @@ function BusinessDetails() {
           </div>
 
         </div>
+
+{vendor.images &&
+  vendor.images.length > 0 && (
+    <div className="flex gap-3 overflow-x-auto px-4 py-4">
+      {vendor.images.map((image, index) => (
+        <img
+          key={index}
+          src={image}
+          alt={`${vendor.name} ${index + 1}`}
+          onClick={() =>
+            setSelectedImage(image)
+          }
+          className={`w-24 h-24 rounded-xl object-cover cursor-pointer border-2 ${
+            selectedImage === image
+              ? "border-blue-600"
+              : "border-transparent"
+          }`}
+        />
+      ))}
+    </div>
+)}
 
         <div className="bg-white rounded-3xl shadow-sm p-5 mx-4 -mt-8 relative z-10">
 
@@ -324,7 +355,6 @@ function BusinessDetails() {
         </div>
 
       </div>
-
     </>
 
   )

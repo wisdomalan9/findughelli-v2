@@ -1,0 +1,142 @@
+rules_version = '2';
+
+service cloud.firestore {
+
+  match /databases/{database}/documents {
+
+    function isLoggedIn() {
+
+      return request.auth != null;
+
+    }
+
+    function isAdmin() {
+
+      return isLoggedIn()
+
+        &&
+
+        get(
+          /databases/$(database)/documents/users/$(request.auth.uid)
+        ).data.role == "admin";
+
+    }
+
+    function isOwner(ownerId) {
+
+      return isLoggedIn()
+
+        &&
+
+        request.auth.uid == ownerId;
+
+    }
+
+    match /users/{userId} {
+
+      allow read, write:
+      if request.auth.uid == userId;
+
+    }
+
+    match /vendors/{vendorId} {
+
+      allow read: if true;
+
+      allow create:
+      if isLoggedIn();
+
+      allow update:
+      if isAdmin()
+
+      ||
+
+      isOwner(resource.data.ownerId);
+
+      allow delete:
+      if isAdmin()
+
+      ||
+
+      isOwner(resource.data.ownerId);
+
+    }
+
+    match /reviews/{reviewId} {
+
+      allow read: if true;
+
+      allow create:
+      if isLoggedIn();
+
+      allow update, delete:
+      if isAdmin();
+
+    }
+
+    match /categories/{categoryId} {
+
+      allow read: if true;
+
+      allow write:
+      if isAdmin();
+
+    }
+
+    match /advertisements/{adId} {
+
+      allow read: if true;
+
+      allow write:
+      if isAdmin();
+
+    }
+
+    match /events/{eventId} {
+
+      allow read: if true;
+
+      allow write:
+      if isAdmin();
+
+    }
+
+    match /favorites/{favoriteId} {
+
+      allow read:
+      if isLoggedIn();
+
+      allow create:
+      if isLoggedIn();
+
+      allow delete:
+      if isLoggedIn();
+
+    }
+    match /events/{eventId} {
+
+  allow read: if true;
+
+  allow create:
+  if isLoggedIn();
+
+  allow update, delete:
+  if isAdmin();
+
+}
+
+    match /jobs/{jobId} {
+
+      allow read: if true;
+
+      allow create:
+      if isLoggedIn();
+
+      allow update, delete:
+      if isAdmin();
+
+    }
+
+  }
+
+}

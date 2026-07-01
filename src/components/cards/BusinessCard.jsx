@@ -1,7 +1,5 @@
 import { Link } from "react-router-dom"
 
-import { motion } from "framer-motion"
-
 import {
   FaStar,
   FaWhatsapp,
@@ -14,26 +12,21 @@ function BusinessCard({ vendor }) {
 
   return (
 
-    <motion.div
-      initial={{
-        opacity: 0,
-        y: 20,
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-      }}
-      transition={{
-        duration: 0.3,
-      }}
-      whileTap={{
-        scale: 0.98,
-      }}
-      whileHover={{
-        y: -2,
-      }}
-      className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden mb-6"
-    >
+<div
+  className="
+    bg-white
+    rounded-3xl
+    shadow-sm
+    border
+    border-gray-100
+    overflow-hidden
+    mb-6
+    transition-all
+    duration-300
+    hover:-translate-y-1
+    active:scale-[0.98]
+  "
+>
 
       <img
         src={
@@ -162,7 +155,7 @@ function BusinessCard({ vendor }) {
 
       </div>
 
-    </motion.div>
+    </div>
 
   )
 

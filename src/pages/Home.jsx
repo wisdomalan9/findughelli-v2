@@ -1,117 +1,79 @@
-import {
-useEffect,
-useState
-} from "react"
+import { useEffect, useState } from "react"
 
-import {
-Helmet
-} from "react-helmet-async"
+import { Helmet } from "react-helmet-async"
 
 import {
 collection,
 onSnapshot,
 query,
-orderBy
+orderBy,
 } from "firebase/firestore"
 
 import { db } from "../firebase/firebase"
 
 import Stories from "../components/home/Stories"
-
 import CategoryChips from "../components/home/CategoryChips"
+import LiveStats from "../components/home/LiveStats"
 
 import FeedPost from "../components/feed/FeedPost"
-
-import LiveStats from "../components/home/LiveStats"
+import CreatePost from "../components/feed/CreatePost"
 
 import Loader from "../components/ui/Loader"
 
-import CreatePost from "../components/feed/CreatePost"
-
 function Home() {
-
-const [vendors, setVendors] =
-useState([])
-
-const [loading, setLoading] =
-useState(true)
+const [vendors, setVendors] = useState([])
+const [loading, setLoading] = useState(true)
 
 useEffect(() => {
-
 const q = query(
-  collection(db, "vendors"),
-  orderBy("createdAt", "desc")
+collection(db, "vendors"),
+orderBy("createdAt", "desc")
 )
 
-const unsubscribe =
-  onSnapshot(q, (snapshot) => {
-
-    const vendorsData = []
-
-    snapshot.forEach((docItem) => {
-
-      vendorsData.push({
+const unsubscribe = onSnapshot(
+  q,
+  (snapshot) => {
+    const vendorsData = snapshot.docs.map(
+      (docItem) => ({
         id: docItem.id,
         ...docItem.data(),
       })
-
-    })
+    )
 
     setVendors(vendorsData)
-
     setLoading(false)
-
-  })
+  },
+  (error) => {
+    console.error(error)
+    setLoading(false)
+  }
+)
 
 return () => unsubscribe()
 
 }, [])
 
+const approvedVendors =
+vendors.filter(
+(vendor) => vendor.approved === true
+)
+
 if (loading) {
-
 return <Loader />
-
 }
 
-const approvedVendors =
-vendors
-.filter(
-(vendor) =>
-vendor.approved === true
-)
-.sort((a, b) => {
-
-    const scoreA =
-      (a.views || 0) +
-      ((a.likes || 0) * 2) +
-      (a.premium ? 100 : 0) +
-      (a.featured ? 50 : 0)
-
-    const scoreB =
-      (b.views || 0) +
-      ((b.likes || 0) * 2) +
-      (b.premium ? 100 : 0) +
-      (b.featured ? 50 : 0)
-
-    return scoreB - scoreA
-
-  })
-
 return (
-
 <>
-
-  <Helmet>
-
-    <title>
-      FindUghelli - Discover Businesses In Ughelli
-    </title>
+<Helmet>
+<title>
+FindUghelli | Discover Businesses,
+Jobs & Events
+</title>
 
     <meta
       name="description"
-      content="Find businesses, restaurants, hotels, mechanics, fashion stores, and services in Ughelli."
+      content="Discover businesses, jobs, events, restaurants, hotels, mechanics, fashion stores and services in Ughelli."
     />
-
   </Helmet>
 
   <div className="max-w-3xl mx-auto px-4 py-4">
@@ -128,53 +90,48 @@ return (
       }
     />
 
-    <div className="mt-6">
+    <section className="mt-6">
 
-      <h2 className="text-2xl font-bold mb-4">
+      <div className="flex items-center justify-between mb-4">
 
-        🔥 Trending Businesses
+        <h2 className="text-2xl font-bold">
+          Trending Businesses
+        </h2>
 
-      </h2>
+        <span className="text-sm text-gray-500">
+          {approvedVendors.length} listed
+        </span>
 
-      {approvedVendors.length === 0 && (
+      </div>
 
-        <div className="bg-white rounded-3xl p-8 text-center shadow-sm">
+      {approvedVendors.length === 0 ? (
+        <div className="bg-white border rounded-2xl p-8 text-center">
 
-          <h3 className="text-xl font-bold">
-
+          <h3 className="text-lg font-semibold mb-2">
             No Businesses Yet
-
           </h3>
 
-          <p className="text-gray-500 mt-2">
-
-            Businesses will appear here once approved.
-
+          <p className="text-gray-500">
+            Be the first business owner
+            to create a listing.
           </p>
 
         </div>
-
-      )}
-
-      {approvedVendors.map(
-        (vendor) => (
-
+      ) : (
+        approvedVendors.map((vendor) => (
           <FeedPost
             key={vendor.id}
             vendor={vendor}
           />
-
-        )
+        ))
       )}
 
-    </div>
+    </section>
 
   </div>
-
 </>
 
 )
-
 }
 
 export default Home

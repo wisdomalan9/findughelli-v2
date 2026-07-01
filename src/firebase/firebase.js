@@ -1,15 +1,9 @@
-import app from "./config"
+import app from "./config";
 
-import {
-  getAuth
-} from "firebase/auth"
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
 
-import {
-  getFirestore
-} from "firebase/firestore"
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-const auth = getAuth(app)
-
-const db = getFirestore(app)
-
-export { auth, db }
+export { app, auth, db };

@@ -2,82 +2,106 @@ import { useEffect, useState } from "react"
 
 import {
   collection,
+  query,
+  where,
   getDocs,
   deleteDoc,
-  doc
+  doc,
 } from "firebase/firestore"
 
 import {
   auth,
-  db
+  db,
 } from "../firebase/firebase"
 
 import { Link } from "react-router-dom"
+import { useAuth } from "../contexts/AuthContext"
 
 function VendorDashboard() {
-
   const [vendors, setVendors] = useState([])
+  const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
+const { user } = useAuth()
 
-    fetchBusinesses()
+useEffect(() => {
+  if (!user) {
+    setLoading(false)
+    return
+  }
 
-  }, [])
+  fetchBusinesses()
+}, [user])
 
   const fetchBusinesses = async () => {
+    try {
+      setLoading(true)
 
-    const querySnapshot =
-      await getDocs(
-        collection(db, "vendors")
+      const q = query(
+        collection(db, "vendors"),
+        where(
+          "ownerId",
+          "==",
+          auth.currentUser.uid
+        )
       )
 
-    const vendorsData = []
+      const querySnapshot =
+        await getDocs(q)
 
-    querySnapshot.forEach((docItem) => {
-
-      const data = docItem.data()
-
-      if (
-        data.ownerId ===
-        auth.currentUser.uid
-      ) {
-
-        vendorsData.push({
+      const vendorsData =
+        querySnapshot.docs.map((docItem) => ({
           id: docItem.id,
-          ...data,
-        })
+          ...docItem.data(),
+        }))
 
-      }
-
-    })
-
-    setVendors(vendorsData)
-
+      setVendors(vendorsData)
+    } catch (error) {
+      console.error(error)
+      alert("Failed to load businesses.")
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleDelete = async (id) => {
-
     const confirmDelete =
-      confirm(
+      window.confirm(
         "Delete this business?"
       )
 
     if (!confirmDelete) return
 
-    await deleteDoc(
-      doc(db, "vendors", id)
+    try {
+      await deleteDoc(
+        doc(db, "vendors", id)
+      )
+
+      setVendors((prev) =>
+        prev.filter(
+          (vendor) => vendor.id !== id
+        )
+      )
+    } catch (error) {
+      console.error(error)
+      alert("Failed to delete business.")
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="max-w-7xl mx-auto p-10">
+        <h1 className="text-4xl font-bold mb-8">
+          Vendor Dashboard
+        </h1>
+
+        <p>Loading...</p>
+      </div>
     )
-
-    fetchBusinesses()
-
   }
 
   return (
-
     <div className="max-w-7xl mx-auto p-10">
-
       <div className="flex items-center justify-between mb-8">
-
         <h1 className="text-4xl font-bold">
           Vendor Dashboard
         </h1>
@@ -88,47 +112,34 @@ function VendorDashboard() {
         >
           Add Business
         </Link>
-
       </div>
 
-{vendors.length === 0 && (
+      {vendors.length === 0 && (
+        <div className="bg-white p-10 rounded-xl shadow text-center">
+          <h2 className="text-2xl font-bold mb-4">
+            No Businesses Yet
+          </h2>
 
-  <div className="bg-white p-10 rounded-xl shadow text-center">
+          <p className="mb-6">
+            Start by adding your first
+            business.
+          </p>
 
-    <h2 className="text-2xl font-bold mb-4">
-
-      No Businesses Yet
-
-    </h2>
-
-    <p className="mb-6">
-
-      Start by adding your first business.
-
-    </p>
-
-    <Link
-      to="/add-business"
-      className="bg-blue-700 text-white px-6 py-3 rounded"
-    >
-
-      Add Business
-
-    </Link>
-
-  </div>
-
-)}
+          <Link
+            to="/add-business"
+            className="bg-blue-700 text-white px-6 py-3 rounded"
+          >
+            Add Business
+          </Link>
+        </div>
+      )}
 
       <div className="grid md:grid-cols-3 gap-6">
-
         {vendors.map((vendor) => (
-
           <div
             key={vendor.id}
             className="bg-white rounded-xl overflow-hidden shadow"
           >
-
             <img
               src={
                 vendor.image ||
@@ -139,7 +150,6 @@ function VendorDashboard() {
             />
 
             <div className="p-6">
-
               <h2 className="text-2xl font-bold mb-2">
                 {vendor.name}
               </h2>
@@ -148,25 +158,51 @@ function VendorDashboard() {
                 {vendor.category}
               </p>
 
-<p className="text-sm">
-  Views: {vendor.views || 0}
-</p>
-
-<p className="text-sm mb-4">
-  WhatsApp Clicks:
-  {" "}
-  {vendor.whatsappClicks || 0}
-</p>
-              <p className="text-sm mb-4">
-
-                {vendor.approved
-                  ? "Approved"
-                  : "Pending Approval"}
-
+              <p className="text-sm">
+                👀 Views:{" "}
+                {vendor.views || 0}
               </p>
 
-              <div className="flex gap-3">
+              <p className="text-sm">
+                📱 WhatsApp Clicks:{" "}
+                {vendor.whatsappClicks || 0}
+              </p>
 
+              <p className="text-sm">
+                ⭐ Rating:{" "}
+                {vendor.rating || 0}
+              </p>
+
+              <p className="text-sm">
+                💬 Reviews:{" "}
+                {vendor.reviewCount || 0}
+              </p>
+
+              <div className="mt-4 mb-4">
+                {vendor.approved ? (
+                  <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-sm">
+                    Approved
+                  </span>
+                ) : (
+                  <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">
+                    Pending Approval
+                  </span>
+                )}
+
+                {vendor.featured && (
+                  <span className="ml-2 bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+                    Featured
+                  </span>
+                )}
+
+                {vendor.premium && (
+                  <span className="ml-2 bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">
+                    Premium
+                  </span>
+                )}
+              </div>
+
+              <div className="flex gap-3">
                 <Link
                   to={`/edit-business/${vendor.id}`}
                   className="bg-yellow-500 text-white px-4 py-2 rounded"
@@ -176,25 +212,20 @@ function VendorDashboard() {
 
                 <button
                   onClick={() =>
-                    handleDelete(vendor.id)
+                    handleDelete(
+                      vendor.id
+                    )
                   }
                   className="bg-red-600 text-white px-4 py-2 rounded"
                 >
                   Delete
                 </button>
-
               </div>
-
             </div>
-
           </div>
-
         ))}
-
       </div>
-
     </div>
-
   )
 }
 

@@ -1,0 +1,132 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    function userDoc() {
+      return get(
+        /databases/$(database)/documents/users/$(request.auth.uid)
+      );
+    }
+
+    function isAdmin() {
+      return isLoggedIn() &&
+        userDoc().data.role == "admin";
+    }
+
+    function isOwner(ownerId) {
+      return isLoggedIn() &&
+        request.auth.uid == ownerId;
+    }
+
+    // Users
+    match /users/{userId} {
+      allow read, create: if isLoggedIn() &&
+        request.auth.uid == userId;
+
+      allow update, delete: if isLoggedIn() &&
+        request.auth.uid == userId;
+    }
+
+    // Vendors
+    match /vendors/{vendorId} {
+
+      allow read: if true;
+
+      allow create: if isLoggedIn();
+
+      allow update: if isAdmin() ||
+        isOwner(resource.data.ownerId);
+
+      allow delete: if isAdmin() ||
+        isOwner(resource.data.ownerId);
+
+      // Comments subcollection
+      match /comments/{commentId} {
+
+        allow read: if true;
+
+        allow create: if isLoggedIn();
+
+        allow update, delete:
+          if isAdmin() ||
+          isOwner(resource.data.userId);
+      }
+    }
+
+    // Reviews
+    match /reviews/{reviewId} {
+
+      allow read: if true;
+
+      allow create: if isLoggedIn();
+
+      allow update, delete:
+        if isAdmin() ||
+        isOwner(resource.data.userId);
+    }
+
+    // Favorites
+    match /favorites/{favoriteId} {
+
+      allow read:
+        if isLoggedIn();
+
+      allow create:
+        if isLoggedIn();
+
+      allow update:
+        if false;
+
+      allow delete:
+        if isAdmin() ||
+        isOwner(resource.data.userId);
+    }
+
+    // Jobs
+    match /jobs/{jobId} {
+
+      allow read: if true;
+
+      allow create:
+        if isLoggedIn();
+
+      allow update, delete:
+        if isAdmin();
+    }
+
+    // Events
+    match /events/{eventId} {
+
+      allow read: if true;
+
+      allow create:
+        if isLoggedIn();
+
+      allow update, delete:
+        if isAdmin();
+    }
+
+    // Categories
+    match /categories/{categoryId} {
+
+      allow read: if true;
+
+      allow write:
+        if isAdmin();
+    }
+
+    // Advertisements
+    match /advertisements/{adId} {
+
+      allow read: if true;
+
+      allow write:
+        if isAdmin();
+    }
+  }
+}

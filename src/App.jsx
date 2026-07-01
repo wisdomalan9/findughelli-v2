@@ -1,170 +1,192 @@
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom"
+import { BrowserRouter, Routes, Route } from "react-router-dom"
+import { lazy, Suspense } from "react"
 
 import MainLayout from "./layouts/MainLayout"
-
-import Home from "./pages/Home"
-import About from "./pages/About"
-import Contact from "./pages/Contact"
-import Businesses from "./pages/Businesses"
-import Login from "./pages/Login"
-import Register from "./pages/Register"
-import AddBusiness from "./pages/AddBusiness"
-import BusinessDetails from "./pages/BusinessDetails"
 import ProtectedRoute from "./components/ProtectedRoute"
-import VendorDashboard from "./vendor/VendorDashboard"
-import EditBusiness from "./vendor/EditBusiness"
-import Favorites from "./pages/Favorites"
-import Jobs from "./pages/Jobs"
-import AddJob from "./pages/AddJob"
-import Events from "./pages/Events"
-import AddEvent from "./pages/AddEvent"
-import AdminDashboard from "./pages/AdminDashboard"
-import Create from "./pages/Create"
-import Notifications from "./pages/Notifications"
-import Profile from "./pages/Profile"
+import Loader from "./components/ui/Loader"
+
+const Home = lazy(() => import("./pages/Home"))
+const About = lazy(() => import("./pages/About"))
+const Contact = lazy(() => import("./pages/Contact"))
+const Businesses = lazy(() => import("./pages/Businesses"))
+const Login = lazy(() => import("./pages/Login"))
+const Register = lazy(() => import("./pages/Register"))
+const AddBusiness = lazy(() => import("./pages/AddBusiness"))
+const BusinessDetails = lazy(() => import("./pages/BusinessDetails"))
+const Favorites = lazy(() => import("./pages/Favorites"))
+const Jobs = lazy(() => import("./pages/Jobs"))
+const AddJob = lazy(() => import("./pages/AddJob"))
+const Events = lazy(() => import("./pages/Events"))
+const AddEvent = lazy(() => import("./pages/AddEvent"))
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"))
+const Create = lazy(() => import("./pages/Create"))
+const Notifications = lazy(() => import("./pages/Notifications"))
+const Profile = lazy(() => import("./pages/Profile"))
+const NotFound = lazy(
+  () => import("./pages/NotFound")
+)
+
+const VendorDashboard = lazy(() =>
+  import("./vendor/VendorDashboard")
+)
+
+const EditBusiness = lazy(() =>
+  import("./vendor/EditBusiness")
+)
+
 function App() {
-
   return (
-
     <BrowserRouter>
-
-      <Routes>
-
-        <Route
-          path="/"
-          element={<MainLayout />}
-        >
-
+<Suspense fallback={<Loader />}>
+        <Routes>
           <Route
-            index
-            element={<Home />}
-          />
+            path="/"
+            element={<MainLayout />}
+          >
 
-          <Route
-            path="about"
-            element={<About />}
-          />
+            <Route
+              index
+              element={<Home />}
+            />
 
-          <Route
-            path="contact"
-            element={<Contact />}
-          />
+            <Route
+              path="about"
+              element={<About />}
+            />
 
-          <Route
-            path="businesses"
-            element={<Businesses />}
-          />
+            <Route
+              path="contact"
+              element={<Contact />}
+            />
 
-          <Route
-            path="business/:id"
-            element={<BusinessDetails />}
-          />
+            <Route
+              path="businesses"
+              element={<Businesses />}
+            />
 
-<Route
-  path="add-business"
-  element={
-    <ProtectedRoute>
+            <Route
+              path="business/:id"
+              element={<BusinessDetails />}
+            />
 
-      <AddBusiness />
+            <Route
+              path="add-business"
+              element={
+                <ProtectedRoute>
+                  <AddBusiness />
+                </ProtectedRoute>
+              }
+            />
 
-    </ProtectedRoute>
-  }
-/>
+            <Route
+              path="login"
+              element={<Login />}
+            />
 
-          <Route
-            path="login"
-            element={<Login />}
-          />
-
-          <Route
-            path="register"
-            element={<Register />}
-          />
+            <Route
+              path="register"
+              element={<Register />}
+            />
 
 <Route
   path="favorites"
-  element={<Favorites />}
+  element={
+    <ProtectedRoute>
+      <Favorites />
+    </ProtectedRoute>
+  }
 />
 
 <Route
   path="create"
-  element={<Create />}
-/>
-
-
-          <Route
-  path="admin"
-  element={
-    <ProtectedRoute adminOnly={true}>
-
-      <AdminDashboard />
-
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="vendor-dashboard"
   element={
     <ProtectedRoute>
-
-      <VendorDashboard />
-
+      <Create />
     </ProtectedRoute>
   }
 />
-
-<Route
-  path="edit-business/:id"
-  element={
-    <ProtectedRoute>
-
-      <EditBusiness />
-
-    </ProtectedRoute>
-  }
-/>
-
-<Route
-  path="jobs"
-  element={<Jobs />}
-/>
+            <Route
+              path="jobs"
+              element={<Jobs />}
+            />
 
 <Route
   path="add-job"
-  element={<AddJob />}
+  element={
+    <ProtectedRoute>
+      <AddJob />
+    </ProtectedRoute>
+  }
 />
 
-<Route
-  path="events"
-  element={<Events />}
-/>
+            <Route
+              path="events"
+              element={<Events />}
+            />
 
 <Route
   path="add-event"
-  element={<AddEvent />}
+  element={
+    <ProtectedRoute>
+      <AddEvent />
+    </ProtectedRoute>
+  }
 />
 
 <Route
   path="notifications"
-  element={<Notifications />}
+  element={
+    <ProtectedRoute>
+      <Notifications />
+    </ProtectedRoute>
+  }
 />
 
 <Route
   path="profile"
-  element={<Profile />}
+  element={
+    <ProtectedRoute>
+      <Profile />
+    </ProtectedRoute>
+  }
 />
 
-        </Route>
+            <Route
+              path="vendor-dashboard"
+              element={
+                <ProtectedRoute>
+                  <VendorDashboard />
+                </ProtectedRoute>
+              }
+            />
 
-      </Routes>
+            <Route
+              path="edit-business/:id"
+              element={
+                <ProtectedRoute>
+                  <EditBusiness />
+                </ProtectedRoute>
+              }
+            />
 
+            <Route
+              path="admin"
+              element={
+                <ProtectedRoute adminOnly={true}>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+
+<Route
+  path="*"
+  element={<NotFound />}
+/>
+
+          </Route>
+        </Routes>
+      </Suspense>
     </BrowserRouter>
-
   )
 }
 
